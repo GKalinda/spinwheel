@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ruleta - Tiradas Gratis</title>
+<style>
+body {
+  font-family: sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #f5f5f5;
+  margin: 0;
+  flex-direction: column;
+}
+.flecha {
+  width: 0;
+  height: 0;
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-top: 30px solid black;
+  margin: 0 auto 5px;
+  position: relative;
+  z-index: 10;
+}
+.ruleta-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#canvas {
+  border-radius: 50%;
+  cursor: pointer;
+  transition: none;
+}
+#candado {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 90px;
+  color: rgba(0, 0, 0, 0.5);
+  z-index: 20;
+  pointer-events: none;
+  opacity: 0; /* ocultado por defecto */
+  transition: opacity 0.6s ease, transform 0.3s ease;
+}
+#candado.desbloqueado {
+  color: gold;
+  animation: vibrar 0.3s ease-in-out 3, brillar 1s ease-in-out 2;
+}
+@keyframes vibrar {
+  0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+  25% { transform: translate(-50%, -50%) rotate(10deg); }
+  75% { transform: translate(-50%, -50%) rotate(-10deg); }
+}
+@keyframes brillar {
+  0%, 100% { text-shadow: none; }
+  50% { text-shadow: 0 0 20px gold; }
+}
+
+/* --- Botón girar --- */
+#girarBtn {
+  background: linear-gradient(to right, #758fff, #9c7eff);
+  border: none;
+  padding: 12px 24px;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.3s;
+  margin-top: 20px;
+  opacity: 1; /* activo por defecto */
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+#girarBtn.enabled {
+  opacity: 1;
+}
+#girarBtn.enabled:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+#resultado {
+  margin-top: 20px;
+  font-size: 18px;
+  font-weight: bold;
+  min-height: 24px;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+
+<div>
+  <div class="flecha"></div>
+  <div class="ruleta-container">
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <div id="candado">🔒</div>
+  </div>
+  <br>
+  <button id="girarBtn" onclick="girarRuleta()" class="enabled">Girar Ruleta</button>
+  <div id="resultado"></div>
+</div>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+const resultado = document.getElementById("resultado");
+const girarBtn = document.getElementById("girarBtn");
+const candado = document.getElementById("candado");
+
+let tiradaGratis = false;
+let ruletaGirando = false;
+
+const opciones = [
+  { texto: "5€", mensaje: "Debes 5€" },
+  { texto: "Perdonado", mensaje: "¡Perdonado!" },
+  { texto: "150€", mensaje: "Debes 150€" },
+  { texto: "200€", mensaje: "Debes 200€" },
+  { texto: "20€", mensaje: "Debes 20€" },
+  { texto: "100€", mensaje: "Debes 100€" },
+  { texto: "80€", mensaje: "Debes 80€" },
+  { texto: "Vuelve a tirar", mensaje: "¡Tira de nuevo!" },
+  { texto: "350€", mensaje: "Debes 350€" },
+  { texto: "300€", mensaje: "Debes 300€" },
+  { texto: "50€", mensaje: "Debes 50€" },
+  { texto: "250€", mensaje: "Debes 250€" }
+];
+
+const colores = [
+  "#ffadad", "#ffd6a5", "#fdffb6", "#caffbf", "#9bf6ff", "#a0c4ff",
+  "#bdb2ff", "#ffc6ff", "#fffffc", "#d0f4de", "#f1cbff", "#ffb3c6"
+];
+
+const slices = opciones.length;
+const sliceAngle = 360 / slices;
+
+function dibujarRuleta() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (let i = 0; i < slices; i++) {
+    ctx.beginPath();
+    ctx.moveTo(200, 200);
+    ctx.fillStyle = colores[i % colores.length];
+    ctx.arc(200, 200, 200, (i * 2 * Math.PI) / slices, ((i + 1) * 2 * Math.PI) / slices);
+    ctx.fill();
+
+    ctx.save();
+    ctx.translate(200, 200);
+    ctx.rotate(((i + 0.5) * 2 * Math.PI) / slices);
+    ctx.fillStyle = "#000";
+    ctx.font = "16px sans-serif";
+    ctx.textAlign = "right";
+    ctx.fillText(opciones[i].texto, 180, 4);
+    ctx.restore();
+  }
+}
+dibujarRuleta();
+
+function girarRuleta() {
+  // Ahora no hay chequeos de pago: cualquiera puede tirar.
+  if(ruletaGirando) return;
+
+  ruletaGirando = true;
+  girarBtn.disabled = true;
+  girarBtn.classList.remove("enabled");
+  candado.style.opacity = "0";
+
+  // Reinicia animación siempre antes de cada giro
+  canvas.style.transition = "none";
+  canvas.style.transform = "rotate(0deg)";
+  void canvas.offsetWidth; // Forzar reflow para reiniciar la animación
+
+  const vueltas = 5;
+  const anguloAleatorio = Math.random() * 360;
+  const anguloFinal = (vueltas * 360) + anguloAleatorio;
+
+  setTimeout(() => {
+    canvas.style.transition = "transform 3s ease-out";
+    canvas.style.transform = `rotate(${anguloFinal}deg)`;
+  }, 50);
+
+  setTimeout(() => {
+    const anguloReal = anguloFinal % 360;
+    const anguloConFlechaArriba = (anguloReal + 90) % 360;
+    const indice = Math.floor((360 - anguloConFlechaArriba) / sliceAngle) % slices;
+    const opcion = opciones[indice];
+
+    resultado.innerText = opcion.mensaje;
+
+    if (opcion.texto === "Perdonado") {
+      alert("¡Has sido perdonado! 🎉");
+      // restaurar estado limpio si quieres
+      ruletaGirando = false;
+      girarBtn.disabled = false;
+      girarBtn.classList.add("enabled");
+      return;
+    }
+
+    if (opcion.texto === "Vuelve a tirar") {
+      alert("¡Tienes una tirada gratis! 🎉");
+      tiradaGratis = true;
+      ruletaGirando = false;
+      candado.style.opacity = "0";
+      girarBtn.disabled = false;
+      girarBtn.classList.add("enabled");
+      return;
+    }
+
+    // Para los resultados con cantidad mostramos mensaje y permitimos seguir
+    const match = opcion.texto.match(/(\d+)(€)/);
+    if (match) {
+      // aquí sólo mostramos la deuda en pantalla, sin pagos
+      const cantidad = match[1];
+      resultado.innerText = `Resultado: debes ${cantidad}€`;
+      ruletaGirando = false;
+      girarBtn.disabled = false;
+      girarBtn.classList.add("enabled");
+    } else {
+      ruletaGirando = false;
+      girarBtn.disabled = false;
+      girarBtn.classList.add("enabled");
+    }
+  }, 3050);
+}
+
+// Hacer que el canvas también gire si el usuario hace click sobre él
+canvas.addEventListener('click', () => {
+  if (!ruletaGirando) girarRuleta();
+});
+</script>
+</body>
+</html>
