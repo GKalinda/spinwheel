@@ -13,14 +13,15 @@
     min-height: 100vh;
     background: radial-gradient(circle at center, #ffffff 0%, #f0f2f5 100%);
     margin: 0;
-    padding: 40px 20px; /* Algo de padding arriba y abajo para que respire */
+    padding: 40px 20px;
     box-sizing: border-box;
   }
 
+  /* --- Diseño Principal --- */
   .layout-principal {
     display: flex;
     gap: 40px;
-    align-items: stretch; /* CLAVE: Hace que ambos cuadros tengan la misma altura */
+    align-items: stretch; /* Mantiene misma altura en ambos paneles */
     flex-wrap: wrap;
     justify-content: center;
     max-width: 1200px;
@@ -36,11 +37,12 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center; /* Mantiene la ruleta centrada verticalmente */
-    flex: 1; /* Permite que tome el espacio necesario */
+    justify-content: center;
+    flex: 1;
     min-width: 450px;
   }
 
+  /* --- Ruleta Visual --- */
   .flecha {
     width: 0;
     height: 0;
@@ -68,7 +70,7 @@
     display: block;
   }
 
-  /* Centro de la ruleta (Pivote 3D) */
+  /* Pivote 3D */
   .ruleta-container::after {
     content: '';
     position: absolute;
@@ -84,7 +86,7 @@
       0 4px 10px rgba(0,0,0,0.2);
   }
 
-  /* --- Botón girar --- */
+  /* --- Botones y Resultados --- */
   #girarBtn {
     background: linear-gradient(135deg, #758fff, #9c7eff);
     border: none;
@@ -123,7 +125,7 @@
     transition: all 0.3s ease;
   }
 
-  /* Animaciones */
+  /* Animaciones Especiales */
   @keyframes parpadear {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.7; }
@@ -168,18 +170,12 @@
     margin: 0 0 20px 0;
     overflow-y: auto;
     flex-grow: 1;
-    /* Estilo para la barra de scroll (opcional pero queda más limpio) */
     scrollbar-width: thin;
     scrollbar-color: #ced6e0 transparent;
   }
 
-  #lista-opciones::-webkit-scrollbar {
-    width: 6px;
-  }
-  #lista-opciones::-webkit-scrollbar-thumb {
-    background-color: #ced6e0;
-    border-radius: 10px;
-  }
+  #lista-opciones::-webkit-scrollbar { width: 6px; }
+  #lista-opciones::-webkit-scrollbar-thumb { background-color: #ced6e0; border-radius: 10px; }
 
   .item-opcion {
     display: flex;
@@ -198,9 +194,7 @@
     transition: border-color 0.2s;
   }
 
-  .item-opcion input:focus {
-    border-color: #758fff;
-  }
+  .item-opcion input:focus { border-color: #758fff; }
 
   .btn-eliminar {
     background: #ff4757;
@@ -218,9 +212,7 @@
     align-items: center;
   }
 
-  .btn-eliminar:hover {
-    background: #ff6b81;
-  }
+  .btn-eliminar:hover { background: #ff6b81; }
 
   .btn-añadir {
     background: #2ed573;
@@ -232,7 +224,7 @@
     font-weight: bold;
     font-size: 16px;
     transition: all 0.2s;
-    margin-top: auto; /* Empuja el botón al fondo si hay pocas opciones */
+    margin-top: auto; 
   }
 
   .btn-añadir:hover {
@@ -240,15 +232,10 @@
     transform: translateY(-2px);
   }
 
-  /* Adaptación para móviles */
+  /* Móviles */
   @media (max-width: 900px) {
-    .contenedor-ruleta {
-      min-width: 100%;
-    }
-    .panel-configuracion {
-      width: 100%;
-      min-height: 400px;
-    }
+    .contenedor-ruleta { min-width: 100%; }
+    .panel-configuracion { width: 100%; min-height: 400px; }
   }
 </style>
 </head>
@@ -267,14 +254,14 @@
 
   <div class="panel-configuracion">
     <h3>⚙️ Editar Opciones</h3>
-    <ul id="lista-opciones">
-      </ul>
+    <ul id="lista-opciones"></ul>
     <button class="btn-añadir" onclick="añadirOpcion()">+ Añadir nueva opción</button>
   </div>
 
 </div>
 
 <script>
+// --- LÓGICA DE LA RULETA ---
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const resultado = document.getElementById("resultado");
@@ -284,7 +271,6 @@ const listaOpcionesUI = document.getElementById("lista-opciones");
 let ruletaGirando = false;
 let rotacionActual = 0;
 
-// Arreglo dinámico de opciones
 let opciones = [
   "5€", "Perdonado", "150€", "200€", "20€", "100€", 
   "80€", "Vuelve a tirar", "350€", "300€", "50€", "250€"
@@ -317,9 +303,7 @@ function dibujarRuleta() {
     return;
   }
 
-  const sliceAngle = 360 / slices;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
   const centroX = canvas.width / 2;
   const centroY = canvas.height / 2;
   const radio = centroX;
@@ -379,7 +363,6 @@ function girarRuleta() {
 
   canvas.style.transition = "transform 4s cubic-bezier(0.2, 0.8, 0.1, 1)";
   canvas.style.transform = `rotate(${rotacionFinal}deg)`;
-
   rotacionActual = rotacionFinal;
 
   setTimeout(() => {
@@ -401,6 +384,7 @@ function girarRuleta() {
   }, 4050); 
 }
 
+// --- LÓGICA DEL PANEL DE CONFIGURACIÓN ---
 function renderizarLista() {
   listaOpcionesUI.innerHTML = "";
   opciones.forEach((opcion, index) => {
@@ -414,7 +398,6 @@ function renderizarLista() {
     
     const btnEliminar = document.createElement("button");
     btnEliminar.className = "btn-eliminar";
-    // Símbolo de papelera o X
     btnEliminar.innerHTML = "×"; 
     btnEliminar.onclick = () => eliminarOpcion(index);
     
@@ -445,10 +428,30 @@ function añadirOpcion() {
   listaOpcionesUI.scrollTop = listaOpcionesUI.scrollHeight;
 }
 
+// Inicializar y Eventos
 renderizarLista();
-
 canvas.addEventListener('click', () => {
   if (!ruletaGirando) girarRuleta();
+});
+
+// --- BARRERAS DE PROTECCIÓN BÁSICA ---
+document.addEventListener('contextmenu', function(e) {
+  e.preventDefault();
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'F12' || e.keyCode === 123) {
+    e.preventDefault();
+    return false;
+  }
+  if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
+    e.preventDefault();
+    return false;
+  }
+  if (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.key === 'S' || e.key === 's')) {
+    e.preventDefault();
+    return false;
+  }
 });
 </script>
 </body>
