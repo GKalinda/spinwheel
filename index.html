@@ -30,7 +30,7 @@
     border-left: 20px solid transparent;
     border-right: 20px solid transparent;
     border-top: 35px solid #ff4757;
-    margin: 0 auto -15px; /* Margen negativo para que se superponga a la ruleta */
+    margin: 0 auto -15px; 
     position: relative;
     z-index: 10;
     filter: drop-shadow(0px 4px 2px rgba(0,0,0,0.2));
@@ -41,7 +41,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    /* Borde exterior tipo casino */
     padding: 10px;
     background: #2f3542;
     border-radius: 50%;
@@ -51,21 +50,23 @@
   #canvas {
     border-radius: 50%;
     cursor: pointer;
-    /* Eliminamos la transition de aquí, la manejaremos en JS */
     display: block;
   }
 
-  /* Centro de la ruleta (Pivote) */
+  /* Centro de la ruleta (Pivote 3D) */
   .ruleta-container::after {
     content: '';
     position: absolute;
     width: 30px;
     height: 30px;
-    background: #f1f2f6;
-    border: 4px solid #ced6e0;
+    background: radial-gradient(circle at top left, #ffffff 0%, #ced6e0 70%, #a4b0be 100%);
+    border: 3px solid #ced6e0;
     border-radius: 50%;
     z-index: 5;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    box-shadow: 
+      inset 0 1px 3px rgba(0,0,0,0.4),
+      0 2px 5px rgba(0,0,0,0.4),
+      0 4px 10px rgba(0,0,0,0.2);
   }
 
   /* --- Botón girar --- */
@@ -107,9 +108,23 @@
     transition: all 0.3s ease;
   }
   
-  .destacado {
+  /* Animaciones de resultados especiales */
+  @keyframes parpadear {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  
+  .resultado-perdonado {
     color: #2ed573 !important;
     transform: scale(1.1);
+    animation: parpadear 1s ease-in-out infinite;
+    text-shadow: 0 0 5px rgba(46, 213, 115, 0.3);
+  }
+
+  .resultado-reintentar {
+    color: #758fff !important;
+    transform: scale(1.1);
+    font-style: italic;
   }
 </style>
 </head>
@@ -131,7 +146,7 @@ const resultado = document.getElementById("resultado");
 const girarBtn = document.getElementById("girarBtn");
 
 let ruletaGirando = false;
-let rotacionActual = 0; // Guardamos la rotación para que no "salte" al volver a tirar
+let rotacionActual = 0;
 
 const opciones = [
   { texto: "5€", mensaje: "Debes 5€" },
@@ -156,6 +171,22 @@ const colores = [
 const slices = opciones.length;
 const sliceAngle = 360 / slices;
 
+// Función para oscurecer colores y crear el efecto de degradado
+function ajustarColor(color, cantidad) {
+  let r, g, b;
+  if (color.startsWith('#')) {
+    r = parseInt(color.slice(1, 3), 16);
+    g = parseInt(color.slice(3, 5), 16);
+    b = parseInt(color.slice(5, 7), 16);
+  } else {
+    r = g = b = 128; // Color por defecto si falla
+  }
+  r = Math.max(0, Math.min(255, r + cantidad));
+  g = Math.max(0, Math.min(255, g + cantidad));
+  b = Math.max(0, Math.min(255, b + cantidad));
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
 function dibujarRuleta() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   
@@ -164,16 +195,21 @@ function dibujarRuleta() {
   const radio = centroX;
 
   for (let i = 0; i < slices; i++) {
-    // Dibujar las porciones
     ctx.beginPath();
     ctx.moveTo(centroX, centroY);
-    ctx.fillStyle = colores[i % colores.length];
+    
+    // Aplicar el degradado radial a cada porción
+    const gradient = ctx.createRadialGradient(centroX, centroY, 0, centroX, centroY, radio);
+    gradient.addColorStop(0, colores[i % colores.length]); 
+    gradient.addColorStop(1, ajustarColor(colores[i % colores.length], -20)); 
+
+    ctx.fillStyle = gradient;
     ctx.arc(centroX, centroY, radio, (i * 2 * Math.PI) / slices, ((i + 1) * 2 * Math.PI) / slices);
     ctx.fill();
 
-    // Añadir una línea separadora entre colores
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = "rgba(0,0,0,0.1)";
+    // Línea separadora sutil para darle mejor acabado
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(0,0,0,0.05)";
     ctx.stroke();
 
     // Dibujar el texto
@@ -196,62 +232,49 @@ function girarRuleta() {
 
   ruletaGirando = true;
   girarBtn.disabled = true;
-  resultado.classList.remove("destacado");
+  resultado.className = ""; // Limpiar clases de animaciones anteriores
   resultado.innerText = "Girando...";
 
-  // Lógica de Determinación: 
-  // En lugar de girar al azar y ver qué sale, elegimos el premio ANTES y calculamos los grados.
-  // Esto es mucho más preciso y evita que caiga justo en medio de una línea.
   const indiceGanador = Math.floor(Math.random() * slices);
-  
-  // Vueltas completas (entre 5 y 8)
   const vueltasExtras = (Math.floor(Math.random() * 4) + 5) * 360;
-  
-  // Ángulo donde está el centro de nuestro premio (en coordenadas del canvas)
   const anguloCentroPremio = (indiceGanador * sliceAngle) + (sliceAngle / 2);
-  
-  // Para que el giro no acabe siempre en el centro exacto, añadimos un margen aleatorio
-  // (Multiplicamos por 0.8 para asegurarnos de que no caiga justo en la línea divisoria)
   const desfaseAleatorio = (Math.random() * (sliceAngle * 0.8)) - (sliceAngle * 0.4);
-
-  // El canvas empieza a los 90 grados respecto a la flecha superior (270 grados relativos)
   const baseRotacion = 270 - anguloCentroPremio + desfaseAleatorio;
 
-  // Calculamos la rotación final sumando la actual, las vueltas y ajustando a la posición deseada
   const moduloActual = rotacionActual % 360;
   let diferenciaRotacion = baseRotacion - moduloActual;
-  if (diferenciaRotacion < 0) diferenciaRotacion += 360; // Asegurar giro hacia adelante
+  if (diferenciaRotacion < 0) diferenciaRotacion += 360; 
 
   const rotacionFinal = rotacionActual + vueltasExtras + diferenciaRotacion;
 
-  // Animación usando cubic-bezier para un efecto de freno realista
-  canvas.style.transition = "transform 4s cubic-bezier(0.17, 0.67, 0.1, 1)";
+  // Curva de animación (empieza rápido, termina muy suave)
+  canvas.style.transition = "transform 4s cubic-bezier(0.2, 0.8, 0.1, 1)";
   canvas.style.transform = `rotate(${rotacionFinal}deg)`;
 
   rotacionActual = rotacionFinal;
 
-  // Esperar a que termine la animación
   setTimeout(() => {
     const opcion = opciones[indiceGanador];
     resultado.innerText = opcion.mensaje;
 
-    if (opcion.texto === "Perdonado" || opcion.texto === "Vuelve a tirar") {
-      resultado.classList.add("destacado");
+    // Aplicar estilos especiales según el premio que haya salido
+    if (opcion.texto === "Perdonado") {
+      resultado.classList.add("resultado-perdonado");
+    } else if (opcion.texto === "Vuelve a tirar") {
+      resultado.classList.add("resultado-reintentar");
+      
+      // Mensaje de feedback tras un momento
+      setTimeout(() => {
+        if(!ruletaGirando) resultado.innerText += " (¡Tu turno!)";
+      }, 1500);
     }
 
     ruletaGirando = false;
     girarBtn.disabled = false;
-
-    // Si es vuelve a tirar, un pequeño feedback visual
-    if (opcion.texto === "Vuelve a tirar") {
-       setTimeout(() => {
-         if(!ruletaGirando) resultado.innerText += " (¡Tu turno!)";
-       }, 1500);
-    }
-  }, 4050); // 4000ms de transición + 50ms de margen
+  }, 4050); // Tiempo alineado con la duración de la transición CSS + 50ms de margen
 }
 
-// Hacer que el canvas también gire si el usuario hace click sobre él
+// Permitir que el click en la rueda también active el giro
 canvas.addEventListener('click', () => {
   if (!ruletaGirando) girarRuleta();
 });
