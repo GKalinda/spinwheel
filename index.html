@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Ruleta - Tiradas Gratis</title>
+<title>Ruleta Compacta - Tiradas Gratis</title>
 <style>
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -13,46 +13,44 @@
     min-height: 100vh;
     background: radial-gradient(circle at center, #ffffff 0%, #f0f2f5 100%);
     margin: 0;
-    padding: 40px 20px;
+    padding: 20px;
     box-sizing: border-box;
   }
 
-  /* --- Diseño Principal --- */
+  /* --- Diseño Principal Compacto --- */
   .layout-principal {
     display: flex;
-    gap: 40px;
-    align-items: stretch; /* Mantiene misma altura en ambos paneles */
+    gap: 30px;
+    align-items: flex-start;
     flex-wrap: wrap;
     justify-content: center;
-    max-width: 1200px;
+    max-width: 1000px;
     width: 100%;
   }
 
   .contenedor-ruleta {
     background: white;
-    padding: 40px;
+    padding: 30px;
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.08);
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    flex: 1;
-    min-width: 450px;
+    flex: 0 1 auto; /* No se expande innecesariamente */
   }
 
-  /* --- Ruleta Visual --- */
+  /* --- Ruleta Visual Redimensionada --- */
   .flecha {
     width: 0;
     height: 0;
-    border-left: 20px solid transparent;
-    border-right: 20px solid transparent;
-    border-top: 35px solid #ff4757;
-    margin: 0 auto -15px; 
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-top: 25px solid #ff4757;
+    margin: 0 auto -10px; 
     position: relative;
     z-index: 10;
-    filter: drop-shadow(0px 4px 2px rgba(0,0,0,0.2));
+    filter: drop-shadow(0px 3px 2px rgba(0,0,0,0.2));
   }
 
   .ruleta-container {
@@ -61,181 +59,137 @@
     justify-content: center;
     align-items: center;
     border-radius: 50%;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
   }
 
   #canvas {
     border-radius: 50%;
     cursor: pointer;
     display: block;
+    width: 300px; /* Tamaño reducido */
+    height: 300px;
   }
 
   /* Pivote 3D */
   .ruleta-container::after {
     content: '';
     position: absolute;
-    width: 30px;
-    height: 30px;
+    width: 24px;
+    height: 24px;
     background: radial-gradient(circle at top left, #ffffff 0%, #ced6e0 70%, #a4b0be 100%);
-    border: 3px solid #ced6e0;
+    border: 2px solid #ced6e0;
     border-radius: 50%;
     z-index: 5;
-    box-shadow: 
-      inset 0 1px 3px rgba(0,0,0,0.4),
-      0 2px 5px rgba(0,0,0,0.4),
-      0 4px 10px rgba(0,0,0,0.2);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3);
   }
 
   /* --- Botones y Resultados --- */
   #girarBtn {
     background: linear-gradient(135deg, #758fff, #9c7eff);
     border: none;
-    padding: 15px 35px;
+    padding: 12px 28px;
     color: white;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
     border-radius: 50px;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(117, 143, 255, 0.4);
+    box-shadow: 0 4px 12px rgba(117, 143, 255, 0.3);
     transition: all 0.3s ease;
-    margin-top: 40px;
+    margin-top: 25px;
     text-transform: uppercase;
     letter-spacing: 1px;
   }
 
   #girarBtn:not(:disabled):hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 6px 20px rgba(117, 143, 255, 0.6);
-  }
-
-  #girarBtn:disabled {
-    background: #ced6e0;
-    box-shadow: none;
-    cursor: not-allowed;
-    transform: none;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(117, 143, 255, 0.5);
   }
 
   #resultado {
-    margin-top: 25px;
-    font-size: 22px;
+    margin-top: 20px;
+    font-size: 18px;
     font-weight: bold;
-    min-height: 30px;
-    text-align: center;
+    min-height: 24px;
     color: #2f3542;
-    transition: all 0.3s ease;
   }
 
-  /* Animaciones Especiales */
-  @keyframes parpadear {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-  }
-  
-  .resultado-perdonado {
-    color: #2ed573 !important;
-    transform: scale(1.1);
-    animation: parpadear 1s ease-in-out infinite;
-    text-shadow: 0 0 5px rgba(46, 213, 115, 0.3);
-  }
-
-  .resultado-reintentar {
-    color: #758fff !important;
-    transform: scale(1.1);
-    font-style: italic;
-  }
-
-  /* --- Panel de Configuración --- */
+  /* --- Panel de Configuración con Scroll --- */
   .panel-configuracion {
     background: white;
-    padding: 30px;
+    padding: 25px;
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    width: 320px;
+    width: 280px; /* Más estrecho */
+    max-height: 520px; /* Altura máxima fija para todo el panel */
     display: flex;
     flex-direction: column;
   }
 
   .panel-configuracion h3 {
-    margin-top: 0;
+    margin: 0 0 15px 0;
+    font-size: 18px;
     color: #2f3542;
-    border-bottom: 2px solid #f1f2f6;
-    padding-bottom: 15px;
-    margin-bottom: 20px;
     text-align: center;
+    border-bottom: 2px solid #f1f2f6;
+    padding-bottom: 10px;
   }
 
   #lista-opciones {
     list-style: none;
     padding: 0;
-    margin: 0 0 20px 0;
-    overflow-y: auto;
-    flex-grow: 1;
+    margin: 0 0 15px 0;
+    overflow-y: auto; /* Scroll habilitado */
+    flex-grow: 1; /* Ocupa el espacio disponible */
+    max-height: 300px; /* Altura máxima de la lista antes de hacer scroll */
     scrollbar-width: thin;
     scrollbar-color: #ced6e0 transparent;
   }
 
-  #lista-opciones::-webkit-scrollbar { width: 6px; }
+  #lista-opciones::-webkit-scrollbar { width: 5px; }
   #lista-opciones::-webkit-scrollbar-thumb { background-color: #ced6e0; border-radius: 10px; }
 
   .item-opcion {
     display: flex;
-    gap: 10px;
-    margin-bottom: 12px;
+    gap: 8px;
+    margin-bottom: 10px;
     align-items: center;
+    padding-right: 5px; /* Espacio para el scroll */
   }
 
   .item-opcion input {
     flex-grow: 1;
-    padding: 12px;
+    padding: 8px 10px;
     border: 1px solid #ced6e0;
-    border-radius: 8px;
-    font-size: 15px;
+    border-radius: 6px;
+    font-size: 14px;
     outline: none;
-    transition: border-color 0.2s;
   }
-
-  .item-opcion input:focus { border-color: #758fff; }
 
   .btn-eliminar {
     background: #ff4757;
     color: white;
     border: none;
-    width: 35px;
-    height: 35px;
-    border-radius: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
-    font-size: 16px;
-    transition: background 0.2s;
-    display: flex;
-    justify-content: center;
-    align-items: center;
   }
-
-  .btn-eliminar:hover { background: #ff6b81; }
 
   .btn-añadir {
     background: #2ed573;
     color: white;
     border: none;
-    padding: 15px;
+    padding: 12px;
     border-radius: 8px;
     cursor: pointer;
     font-weight: bold;
-    font-size: 16px;
-    transition: all 0.2s;
-    margin-top: auto; 
+    font-size: 14px;
   }
 
-  .btn-añadir:hover {
-    background: #26de81;
-    transform: translateY(-2px);
-  }
-
-  /* Móviles */
-  @media (max-width: 900px) {
-    .contenedor-ruleta { min-width: 100%; }
-    .panel-configuracion { width: 100%; min-height: 400px; }
+  /* Ajustes Móviles */
+  @media (max-width: 700px) {
+    .contenedor-ruleta, .panel-configuracion { width: 100%; min-width: unset; }
   }
 </style>
 </head>
@@ -246,16 +200,16 @@
   <div class="contenedor-ruleta">
     <div class="flecha"></div>
     <div class="ruleta-container">
-      <canvas id="canvas" width="400" height="400"></canvas>
+      <canvas id="canvas" width="300" height="300"></canvas>
     </div>
     <button id="girarBtn" onclick="girarRuleta()">Girar Ruleta</button>
-    <div id="resultado">¡Prueba tu suerte!</div>
+    <div id="resultado">¡Suerte!</div>
   </div>
 
   <div class="panel-configuracion">
-    <h3>⚙️ Editar Opciones</h3>
+    <h3>⚙️ Opciones</h3>
     <ul id="lista-opciones"></ul>
-    <button class="btn-añadir" onclick="añadirOpcion()">+ Añadir nueva opción</button>
+    <button class="btn-añadir" onclick="añadirOpcion()">+ Añadir opción</button>
   </div>
 
 </div>
@@ -271,25 +225,11 @@ const listaOpcionesUI = document.getElementById("lista-opciones");
 let ruletaGirando = false;
 let rotacionActual = 0;
 
-let opciones = [
-  "5€", "Perdonado", "150€", "200€", "20€", "100€", 
-  "80€", "Vuelve a tirar", "350€", "300€", "50€", "250€"
-];
-
-const colores = [
-  "#ffadad", "#ffd6a5", "#fdffb6", "#caffbf", "#9bf6ff", "#a0c4ff",
-  "#bdb2ff", "#ffc6ff", "#fffffc", "#d0f4de", "#f1cbff", "#ffb3c6"
-];
+let opciones = ["5€", "Perdonado", "150€", "20€", "100€", "Vuelve a tirar", "50€", "250€"];
+const colores = ["#ffadad", "#ffd6a5", "#fdffb6", "#caffbf", "#9bf6ff", "#a0c4ff", "#bdb2ff", "#ffc6ff"];
 
 function ajustarColor(color, cantidad) {
-  let r, g, b;
-  if (color.startsWith('#')) {
-    r = parseInt(color.slice(1, 3), 16);
-    g = parseInt(color.slice(3, 5), 16);
-    b = parseInt(color.slice(5, 7), 16);
-  } else {
-    r = g = b = 128;
-  }
+  let r = parseInt(color.slice(1, 3), 16), g = parseInt(color.slice(3, 5), 16), b = parseInt(color.slice(5, 7), 16);
   r = Math.max(0, Math.min(255, r + cantidad));
   g = Math.max(0, Math.min(255, g + cantidad));
   b = Math.max(0, Math.min(255, b + cantidad));
@@ -298,160 +238,79 @@ function ajustarColor(color, cantidad) {
 
 function dibujarRuleta() {
   const slices = opciones.length;
-  if (slices === 0) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    return;
-  }
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const centroX = canvas.width / 2;
-  const centroY = canvas.height / 2;
-  const radio = centroX;
-
+  if (slices === 0) return;
+  ctx.clearRect(0, 0, 300, 300);
   for (let i = 0; i < slices; i++) {
     ctx.beginPath();
-    ctx.moveTo(centroX, centroY);
-    
-    const gradient = ctx.createRadialGradient(centroX, centroY, 0, centroX, centroY, radio);
+    ctx.moveTo(150, 150);
+    const gradient = ctx.createRadialGradient(150, 150, 0, 150, 150, 150);
     gradient.addColorStop(0, colores[i % colores.length]); 
     gradient.addColorStop(1, ajustarColor(colores[i % colores.length], -20)); 
-
     ctx.fillStyle = gradient;
-    ctx.arc(centroX, centroY, radio, (i * 2 * Math.PI) / slices, ((i + 1) * 2 * Math.PI) / slices);
+    ctx.arc(150, 150, 150, (i * 2 * Math.PI) / slices, ((i + 1) * 2 * Math.PI) / slices);
     ctx.fill();
-
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "rgba(0,0,0,0.05)";
-    ctx.stroke();
-
     ctx.save();
-    ctx.translate(centroX, centroY);
+    ctx.translate(150, 150);
     ctx.rotate(((i + 0.5) * 2 * Math.PI) / slices);
     ctx.fillStyle = "#2f3542";
-    
-    const fontSize = slices > 15 ? 14 : 18;
-    ctx.font = `bold ${fontSize}px sans-serif`;
+    ctx.font = "bold 14px sans-serif";
     ctx.textAlign = "right";
-    ctx.textBaseline = "middle";
-    ctx.fillText(opciones[i], radio - 20, 0);
+    ctx.fillText(opciones[i], 135, 5);
     ctx.restore();
   }
 }
 
 function girarRuleta() {
   if (ruletaGirando || opciones.length === 0) return;
-
   ruletaGirando = true;
   girarBtn.disabled = true;
-  resultado.className = ""; 
   resultado.innerText = "Girando...";
 
   const slices = opciones.length;
-  const sliceAngle = 360 / slices;
-
   const indiceGanador = Math.floor(Math.random() * slices);
   const vueltasExtras = (Math.floor(Math.random() * 4) + 5) * 360;
-  const anguloCentroPremio = (indiceGanador * sliceAngle) + (sliceAngle / 2);
-  const desfaseAleatorio = (Math.random() * (sliceAngle * 0.8)) - (sliceAngle * 0.4);
-  const baseRotacion = 270 - anguloCentroPremio + desfaseAleatorio;
+  const anguloFinal = 270 - ((indiceGanador * 360 / slices) + (180 / slices));
 
-  const moduloActual = rotacionActual % 360;
-  let diferenciaRotacion = baseRotacion - moduloActual;
-  if (diferenciaRotacion < 0) diferenciaRotacion += 360; 
-
-  const rotacionFinal = rotacionActual + vueltasExtras + diferenciaRotacion;
-
+  const rotacionTotal = rotacionActual + vueltasExtras + (anguloFinal - (rotacionActual % 360) + 360) % 360;
   canvas.style.transition = "transform 4s cubic-bezier(0.2, 0.8, 0.1, 1)";
-  canvas.style.transform = `rotate(${rotacionFinal}deg)`;
-  rotacionActual = rotacionFinal;
+  canvas.style.transform = `rotate(${rotacionTotal}deg)`;
+  rotacionActual = rotacionTotal;
 
   setTimeout(() => {
-    const textoGanador = opciones[indiceGanador];
-    
-    if (textoGanador.toLowerCase().includes("perdonado")) {
-      resultado.innerText = "¡Has sido perdonado! 🎉";
-      resultado.classList.add("resultado-perdonado");
-    } else if (textoGanador.toLowerCase().includes("vuelve a tirar") || textoGanador.toLowerCase().includes("otra vez")) {
-      resultado.innerText = "¡Tira de nuevo! 🔄";
-      resultado.classList.add("resultado-reintentar");
-      setTimeout(() => { if(!ruletaGirando) resultado.innerText += " (¡Tu turno!)"; }, 1500);
-    } else {
-      resultado.innerText = `Resultado: ${textoGanador}`;
-    }
-
+    resultado.innerText = `Resultado: ${opciones[indiceGanador]}`;
     ruletaGirando = false;
     girarBtn.disabled = false;
   }, 4050); 
 }
 
-// --- LÓGICA DEL PANEL DE CONFIGURACIÓN ---
 function renderizarLista() {
   listaOpcionesUI.innerHTML = "";
   opciones.forEach((opcion, index) => {
     const li = document.createElement("li");
     li.className = "item-opcion";
-    
-    const input = document.createElement("input");
-    input.type = "text";
-    input.value = opcion;
-    input.oninput = (e) => actualizarOpcion(index, e.target.value);
-    
-    const btnEliminar = document.createElement("button");
-    btnEliminar.className = "btn-eliminar";
-    btnEliminar.innerHTML = "×"; 
-    btnEliminar.onclick = () => eliminarOpcion(index);
-    
-    li.appendChild(input);
-    li.appendChild(btnEliminar);
+    li.innerHTML = `<input type="text" value="${opcion}" oninput="opciones[${index}]=this.value; dibujarRuleta()">
+                    <button class="btn-eliminar" onclick="eliminarOpcion(${index})">×</button>`;
     listaOpcionesUI.appendChild(li);
   });
   dibujarRuleta();
 }
 
-function actualizarOpcion(index, nuevoValor) {
-  opciones[index] = nuevoValor;
-  dibujarRuleta(); 
-}
-
 function eliminarOpcion(index) {
-  if (opciones.length <= 2) {
-    alert("La ruleta necesita al menos 2 opciones.");
-    return;
-  }
-  opciones.splice(index, 1);
-  renderizarLista();
+  if (opciones.length > 2) { opciones.splice(index, 1); renderizarLista(); }
 }
 
 function añadirOpcion() {
-  opciones.push("Nueva Opción");
+  opciones.push("Nuevo");
   renderizarLista();
   listaOpcionesUI.scrollTop = listaOpcionesUI.scrollHeight;
 }
 
-// Inicializar y Eventos
 renderizarLista();
-canvas.addEventListener('click', () => {
-  if (!ruletaGirando) girarRuleta();
-});
 
-// --- BARRERAS DE PROTECCIÓN BÁSICA ---
-document.addEventListener('contextmenu', function(e) {
-  e.preventDefault();
-});
-
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'F12' || e.keyCode === 123) {
-    e.preventDefault();
-    return false;
-  }
-  if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
-    e.preventDefault();
-    return false;
-  }
-  if (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.key === 'S' || e.key === 's')) {
-    e.preventDefault();
-    return false;
-  }
+// --- PROTECCIÓN ---
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I') || (e.ctrlKey && e.key === 'u')) e.preventDefault();
 });
 </script>
 </body>
