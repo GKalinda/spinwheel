@@ -5,17 +5,48 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Ruleta - Tiradas Gratis</title>
 <style>
+  /* --- Fondo y Entorno Visual --- */
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: radial-gradient(circle at center, #ffffff 0%, #f0f2f5 100%);
     margin: 0;
     padding: 20px;
     box-sizing: border-box;
     overflow-x: hidden;
+    
+    /* Fondo Refinado con Profundidad */
+    background: 
+      linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%),
+      radial-gradient(circle at 70% 30%, rgba(117, 143, 255, 0.05) 0%, rgba(117, 143, 255, 0) 50%),
+      repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.01) 10px, rgba(0,0,0,0.01) 20px);
+    background-attachment: fixed;
+  }
+
+  /* Formas Decorativas en el Fondo */
+  body::before, body::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    z-index: -1; 
+  }
+
+  body::before {
+    width: 500px;
+    height: 500px;
+    background: rgba(117, 143, 255, 0.03);
+    top: -150px;
+    left: -150px;
+  }
+
+  body::after {
+    width: 400px;
+    height: 400px;
+    background: rgba(46, 213, 115, 0.03);
+    bottom: -100px;
+    right: -100px;
   }
 
   /* --- Botón Menú Hamburguesa --- */
@@ -60,20 +91,21 @@
     pointer-events: auto;
   }
 
-  /* --- Diseño Principal de la Ruleta --- */
+  /* --- Contenedor Principal Más Refinado --- */
   .contenedor-ruleta {
     background: white;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    padding: 50px 60px; /* Espaciado interno más generoso */
+    border-radius: 25px; /* Bordes más redondeados */
+    box-shadow: 0 15px 45px rgba(0,0,0,0.06); /* Sombra más suave y extendida */
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     z-index: 10;
   }
 
-  /* --- Ruleta Visual (Tamaño Aumentado) --- */
+  /* --- Ruleta Visual --- */
   .flecha {
     width: 0;
     height: 0;
@@ -99,8 +131,8 @@
     border-radius: 50%;
     cursor: pointer;
     display: block;
-    width: 380px;  /* Ruleta más grande */
-    height: 380px; /* Ruleta más grande */
+    width: 380px;  
+    height: 380px; 
   }
 
   .ruleta-container::after {
@@ -115,17 +147,17 @@
     box-shadow: inset 0 1px 2px rgba(0,0,0,0.4), 0 2px 5px rgba(0,0,0,0.3);
   }
 
-  /* --- Botones y Resultados --- */
+  /* --- Botones y Resultados Refinados --- */
   #girarBtn {
     background: linear-gradient(135deg, #758fff, #9c7eff);
     border: none;
-    padding: 14px 32px;
+    padding: 18px 40px;
     color: white;
-    font-size: 18px;
+    font-size: 19px;
     font-weight: bold;
     border-radius: 50px;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(117, 143, 255, 0.4);
+    box-shadow: 0 5px 20px rgba(117, 143, 255, 0.3);
     transition: all 0.3s ease;
     margin-top: 35px;
     text-transform: uppercase;
@@ -133,8 +165,8 @@
   }
 
   #girarBtn:not(:disabled):hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 6px 20px rgba(117, 143, 255, 0.6);
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 8px 25px rgba(117, 143, 255, 0.5);
   }
 
   #girarBtn:disabled {
@@ -145,12 +177,18 @@
   }
 
   #resultado {
-    margin-top: 25px;
+    background: #f1f2f6; 
+    border: 1px solid #ced6e0; 
+    border-radius: 12px;
+    padding: 15px 25px; 
+    margin-top: 30px; 
     font-size: 20px;
     font-weight: bold;
     min-height: 28px;
     color: #2f3542;
     transition: all 0.3s ease;
+    width: 80%; /* Para que el fondo no ocupe todo el ancho */
+    box-sizing: border-box;
   }
 
   @keyframes parpadear {
@@ -160,15 +198,20 @@
   
   .resultado-perdonado {
     color: #2ed573 !important;
-    transform: scale(1.1);
+    border-color: #2ed573 !important;
+    background: rgba(46, 213, 115, 0.05) !important;
+    transform: scale(1.05);
     animation: parpadear 1s ease-in-out infinite;
-    text-shadow: 0 0 5px rgba(46, 213, 115, 0.3);
+    box-shadow: 0 0 15px rgba(46, 213, 115, 0.2);
   }
 
   .resultado-reintentar {
     color: #758fff !important;
-    transform: scale(1.1);
+    border-color: #758fff !important;
+    background: rgba(117, 143, 255, 0.05) !important;
+    transform: scale(1.05);
     font-style: italic;
+    box-shadow: 0 0 15px rgba(117, 143, 255, 0.2);
   }
 
   /* --- Panel de Configuración Deslizante --- */
@@ -286,10 +329,12 @@
     transform: translateY(-2px);
   }
   
+  /* Ajustes para pantallas pequeñas */
   @media (max-width: 500px) {
-    .contenedor-ruleta { padding: 20px; width: 100%; }
+    .contenedor-ruleta { padding: 30px 20px; width: 100%; border-radius: 15px; }
     #canvas { width: 100%; max-width: 380px; height: auto; aspect-ratio: 1/1; }
     .panel-configuracion { width: 100%; right: -100%; }
+    #resultado { width: 100%; font-size: 18px; }
   }
 </style>
 </head>
@@ -336,12 +381,11 @@ const listaOpcionesUI = document.getElementById("lista-opciones");
 let ruletaGirando = false;
 let rotacionActual = 0;
 
-// Opciones originales restauradas
 let opciones = [
   "5€", "Perdonado", "150€", "200€", "20€", "100€", 
   "80€", "Vuelve a tirar", "350€", "300€", "50€", "250€"
 ];
-// Colores originales restaurados
+
 const colores = [
   "#ffadad", "#ffd6a5", "#fdffb6", "#caffbf", "#9bf6ff", "#a0c4ff",
   "#bdb2ff", "#ffc6ff", "#fffffc", "#d0f4de", "#f1cbff", "#ffb3c6"
@@ -360,7 +404,7 @@ function dibujarRuleta() {
   if (slices === 0) return;
   ctx.clearRect(0, 0, 380, 380);
   
-  const centro = 190; // La mitad de 380
+  const centro = 190; 
   
   for (let i = 0; i < slices; i++) {
     ctx.beginPath();
@@ -381,7 +425,6 @@ function dibujarRuleta() {
     ctx.rotate(((i + 0.5) * 2 * Math.PI) / slices);
     ctx.fillStyle = "#2f3542";
     
-    // Ajuste dinámico de la fuente según la cantidad de opciones
     const fontSize = slices > 15 ? 12 : 16;
     ctx.font = `bold ${fontSize}px sans-serif`;
     ctx.textAlign = "right";
