@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Ruleta Compacta - Tiradas Gratis</title>
+<title>Ruleta - Tiradas Gratis</title>
 <style>
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -15,7 +15,7 @@
     margin: 0;
     padding: 20px;
     box-sizing: border-box;
-    overflow-x: hidden; /* Evita scroll horizontal */
+    overflow-x: hidden;
   }
 
   /* --- Botón Menú Hamburguesa --- */
@@ -52,7 +52,7 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
-    z-index: 999; /* Por debajo del panel, por encima del resto */
+    z-index: 999;
   }
 
   #overlay.activo {
@@ -63,7 +63,7 @@
   /* --- Diseño Principal de la Ruleta --- */
   .contenedor-ruleta {
     background: white;
-    padding: 30px;
+    padding: 40px;
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.08);
     text-align: center;
@@ -73,14 +73,14 @@
     z-index: 10;
   }
 
-  /* --- Ruleta Visual Redimensionada --- */
+  /* --- Ruleta Visual (Tamaño Aumentado) --- */
   .flecha {
     width: 0;
     height: 0;
-    border-left: 15px solid transparent;
-    border-right: 15px solid transparent;
-    border-top: 25px solid #ff4757;
-    margin: 0 auto -10px; 
+    border-left: 18px solid transparent;
+    border-right: 18px solid transparent;
+    border-top: 30px solid #ff4757;
+    margin: 0 auto -12px; 
     position: relative;
     z-index: 10;
     filter: drop-shadow(0px 3px 2px rgba(0,0,0,0.2));
@@ -92,69 +92,95 @@
     justify-content: center;
     align-items: center;
     border-radius: 50%;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
   }
 
   #canvas {
     border-radius: 50%;
     cursor: pointer;
     display: block;
-    width: 300px;
-    height: 300px;
+    width: 380px;  /* Ruleta más grande */
+    height: 380px; /* Ruleta más grande */
   }
 
   .ruleta-container::after {
     content: '';
     position: absolute;
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     background: radial-gradient(circle at top left, #ffffff 0%, #ced6e0 70%, #a4b0be 100%);
-    border: 2px solid #ced6e0;
+    border: 3px solid #ced6e0;
     border-radius: 50%;
     z-index: 5;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.4), 0 2px 5px rgba(0,0,0,0.3);
   }
 
   /* --- Botones y Resultados --- */
   #girarBtn {
     background: linear-gradient(135deg, #758fff, #9c7eff);
     border: none;
-    padding: 12px 28px;
+    padding: 14px 32px;
     color: white;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: bold;
     border-radius: 50px;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(117, 143, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(117, 143, 255, 0.4);
     transition: all 0.3s ease;
-    margin-top: 25px;
+    margin-top: 35px;
     text-transform: uppercase;
     letter-spacing: 1px;
   }
 
   #girarBtn:not(:disabled):hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(117, 143, 255, 0.5);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(117, 143, 255, 0.6);
+  }
+
+  #girarBtn:disabled {
+    background: #ced6e0;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
   }
 
   #resultado {
-    margin-top: 20px;
-    font-size: 18px;
+    margin-top: 25px;
+    font-size: 20px;
     font-weight: bold;
-    min-height: 24px;
+    min-height: 28px;
     color: #2f3542;
+    transition: all 0.3s ease;
+  }
+
+  @keyframes parpadear {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  
+  .resultado-perdonado {
+    color: #2ed573 !important;
+    transform: scale(1.1);
+    animation: parpadear 1s ease-in-out infinite;
+    text-shadow: 0 0 5px rgba(46, 213, 115, 0.3);
+  }
+
+  .resultado-reintentar {
+    color: #758fff !important;
+    transform: scale(1.1);
+    font-style: italic;
   }
 
   /* --- Panel de Configuración Deslizante --- */
   .panel-configuracion {
     position: fixed;
     top: 0;
-    right: -350px; /* Oculto fuera de la pantalla por defecto */
-    width: 280px;
-    height: 100vh; /* Ocupa toda la altura de la pantalla */
+    right: -350px; 
+    width: 320px;
+    height: 100vh; 
     background: white;
     box-shadow: -5px 0 25px rgba(0,0,0,0.15);
-    z-index: 1000; /* Por encima de todo */
+    z-index: 1000; 
     transition: right 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
     padding: 25px 20px;
     box-sizing: border-box;
@@ -163,7 +189,7 @@
   }
 
   .panel-configuracion.abierto {
-    right: 0; /* Desliza hacia adentro */
+    right: 0; 
   }
 
   .header-panel {
@@ -177,7 +203,7 @@
 
   .header-panel h3 {
     margin: 0;
-    font-size: 18px;
+    font-size: 20px;
     color: #2f3542;
   }
 
@@ -206,7 +232,7 @@
     scrollbar-color: #ced6e0 transparent;
   }
 
-  #lista-opciones::-webkit-scrollbar { width: 5px; }
+  #lista-opciones::-webkit-scrollbar { width: 6px; }
   #lista-opciones::-webkit-scrollbar-thumb { background-color: #ced6e0; border-radius: 10px; }
 
   .item-opcion {
@@ -219,34 +245,51 @@
 
   .item-opcion input {
     flex-grow: 1;
-    padding: 8px 10px;
+    padding: 10px;
     border: 1px solid #ced6e0;
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 15px;
     outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .item-opcion input:focus {
+    border-color: #758fff;
   }
 
   .btn-eliminar {
     background: #ff4757;
     color: white;
     border: none;
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
+    font-size: 16px;
   }
 
   .btn-añadir {
     background: #2ed573;
     color: white;
     border: none;
-    padding: 12px;
+    padding: 14px;
     border-radius: 8px;
     cursor: pointer;
     font-weight: bold;
-    font-size: 14px;
-    margin-top: auto; /* Mantiene el botón al fondo */
+    font-size: 15px;
+    margin-top: auto; 
+    transition: transform 0.2s;
+  }
+  
+  .btn-añadir:hover {
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 500px) {
+    .contenedor-ruleta { padding: 20px; width: 100%; }
+    #canvas { width: 100%; max-width: 380px; height: auto; aspect-ratio: 1/1; }
+    .panel-configuracion { width: 100%; right: -100%; }
   }
 </style>
 </head>
@@ -258,10 +301,10 @@
 <div class="contenedor-ruleta">
   <div class="flecha"></div>
   <div class="ruleta-container">
-    <canvas id="canvas" width="300" height="300"></canvas>
+    <canvas id="canvas" width="380" height="380"></canvas>
   </div>
   <button id="girarBtn" onclick="girarRuleta()">Girar Ruleta</button>
-  <div id="resultado">¡Suerte!</div>
+  <div id="resultado">¡Prueba tu suerte!</div>
 </div>
 
 <div class="panel-configuracion" id="panel-config">
@@ -293,8 +336,16 @@ const listaOpcionesUI = document.getElementById("lista-opciones");
 let ruletaGirando = false;
 let rotacionActual = 0;
 
-let opciones = ["5€", "Perdonado", "150€", "20€", "100€", "Vuelve a tirar", "50€", "250€"];
-const colores = ["#ffadad", "#ffd6a5", "#fdffb6", "#caffbf", "#9bf6ff", "#a0c4ff", "#bdb2ff", "#ffc6ff"];
+// Opciones originales restauradas
+let opciones = [
+  "5€", "Perdonado", "150€", "200€", "20€", "100€", 
+  "80€", "Vuelve a tirar", "350€", "300€", "50€", "250€"
+];
+// Colores originales restaurados
+const colores = [
+  "#ffadad", "#ffd6a5", "#fdffb6", "#caffbf", "#9bf6ff", "#a0c4ff",
+  "#bdb2ff", "#ffc6ff", "#fffffc", "#d0f4de", "#f1cbff", "#ffb3c6"
+];
 
 function ajustarColor(color, cantidad) {
   let r = parseInt(color.slice(1, 3), 16), g = parseInt(color.slice(3, 5), 16), b = parseInt(color.slice(5, 7), 16);
@@ -307,23 +358,35 @@ function ajustarColor(color, cantidad) {
 function dibujarRuleta() {
   const slices = opciones.length;
   if (slices === 0) return;
-  ctx.clearRect(0, 0, 300, 300);
+  ctx.clearRect(0, 0, 380, 380);
+  
+  const centro = 190; // La mitad de 380
+  
   for (let i = 0; i < slices; i++) {
     ctx.beginPath();
-    ctx.moveTo(150, 150);
-    const gradient = ctx.createRadialGradient(150, 150, 0, 150, 150, 150);
+    ctx.moveTo(centro, centro);
+    const gradient = ctx.createRadialGradient(centro, centro, 0, centro, centro, centro);
     gradient.addColorStop(0, colores[i % colores.length]); 
     gradient.addColorStop(1, ajustarColor(colores[i % colores.length], -20)); 
     ctx.fillStyle = gradient;
-    ctx.arc(150, 150, 150, (i * 2 * Math.PI) / slices, ((i + 1) * 2 * Math.PI) / slices);
+    ctx.arc(centro, centro, centro, (i * 2 * Math.PI) / slices, ((i + 1) * 2 * Math.PI) / slices);
     ctx.fill();
+    
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(0,0,0,0.05)";
+    ctx.stroke();
+    
     ctx.save();
-    ctx.translate(150, 150);
+    ctx.translate(centro, centro);
     ctx.rotate(((i + 0.5) * 2 * Math.PI) / slices);
     ctx.fillStyle = "#2f3542";
-    ctx.font = "bold 14px sans-serif";
+    
+    // Ajuste dinámico de la fuente según la cantidad de opciones
+    const fontSize = slices > 15 ? 12 : 16;
+    ctx.font = `bold ${fontSize}px sans-serif`;
     ctx.textAlign = "right";
-    ctx.fillText(opciones[i], 135, 5);
+    ctx.textBaseline = "middle";
+    ctx.fillText(opciones[i], centro - 20, 0);
     ctx.restore();
   }
 }
@@ -332,20 +395,42 @@ function girarRuleta() {
   if (ruletaGirando || opciones.length === 0) return;
   ruletaGirando = true;
   girarBtn.disabled = true;
+  resultado.className = "";
   resultado.innerText = "Girando...";
 
   const slices = opciones.length;
   const indiceGanador = Math.floor(Math.random() * slices);
   const vueltasExtras = (Math.floor(Math.random() * 4) + 5) * 360;
-  const anguloFinal = 270 - ((indiceGanador * 360 / slices) + (180 / slices));
+  
+  const sliceAngle = 360 / slices;
+  const anguloCentroPremio = (indiceGanador * sliceAngle) + (sliceAngle / 2);
+  const desfaseAleatorio = (Math.random() * (sliceAngle * 0.8)) - (sliceAngle * 0.4);
+  const baseRotacion = 270 - anguloCentroPremio + desfaseAleatorio;
 
-  const rotacionTotal = rotacionActual + vueltasExtras + (anguloFinal - (rotacionActual % 360) + 360) % 360;
+  const moduloActual = rotacionActual % 360;
+  let diferenciaRotacion = baseRotacion - moduloActual;
+  if (diferenciaRotacion < 0) diferenciaRotacion += 360;
+
+  const rotacionTotal = rotacionActual + vueltasExtras + diferenciaRotacion;
+  
   canvas.style.transition = "transform 4s cubic-bezier(0.2, 0.8, 0.1, 1)";
   canvas.style.transform = `rotate(${rotacionTotal}deg)`;
   rotacionActual = rotacionTotal;
 
   setTimeout(() => {
-    resultado.innerText = `Resultado: ${opciones[indiceGanador]}`;
+    const textoGanador = opciones[indiceGanador];
+    
+    if (textoGanador.toLowerCase().includes("perdonado")) {
+      resultado.innerText = "¡Has sido perdonado! 🎉";
+      resultado.classList.add("resultado-perdonado");
+    } else if (textoGanador.toLowerCase().includes("vuelve a tirar") || textoGanador.toLowerCase().includes("otra vez")) {
+      resultado.innerText = "¡Tira de nuevo! 🔄";
+      resultado.classList.add("resultado-reintentar");
+      setTimeout(() => { if(!ruletaGirando) resultado.innerText += " (¡Tu turno!)"; }, 1500);
+    } else {
+      resultado.innerText = `Resultado: ${textoGanador}`;
+    }
+    
     ruletaGirando = false;
     girarBtn.disabled = false;
   }, 4050); 
@@ -365,15 +450,19 @@ function renderizarLista() {
 
 function eliminarOpcion(index) {
   if (opciones.length > 2) { opciones.splice(index, 1); renderizarLista(); }
+  else { alert("La ruleta necesita al menos 2 opciones."); }
 }
 
 function añadirOpcion() {
-  opciones.push("Nuevo");
+  opciones.push("Nueva");
   renderizarLista();
   listaOpcionesUI.scrollTop = listaOpcionesUI.scrollHeight;
 }
 
 renderizarLista();
+canvas.addEventListener('click', () => {
+  if (!ruletaGirando) girarRuleta();
+});
 
 // --- PROTECCIÓN BÁSICA ---
 document.addEventListener('contextmenu', e => e.preventDefault());
