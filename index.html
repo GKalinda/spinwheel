@@ -15,19 +15,52 @@
     margin: 0;
     padding: 20px;
     box-sizing: border-box;
+    overflow-x: hidden; /* Evita scroll horizontal */
   }
 
-  /* --- Diseño Principal Compacto --- */
-  .layout-principal {
+  /* --- Botón Menú Hamburguesa --- */
+  #btn-menu {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    z-index: 100;
+    transition: transform 0.2s, box-shadow 0.2s;
     display: flex;
-    gap: 30px;
-    align-items: flex-start;
-    flex-wrap: wrap;
     justify-content: center;
-    max-width: 1000px;
-    width: 100%;
+    align-items: center;
+    color: #2f3542;
   }
 
+  #btn-menu:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+  }
+
+  /* --- Overlay oscuro al abrir el menú --- */
+  #overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 999; /* Por debajo del panel, por encima del resto */
+  }
+
+  #overlay.activo {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* --- Diseño Principal de la Ruleta --- */
   .contenedor-ruleta {
     background: white;
     padding: 30px;
@@ -37,7 +70,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    flex: 0 1 auto; /* No se expande innecesariamente */
+    z-index: 10;
   }
 
   /* --- Ruleta Visual Redimensionada --- */
@@ -66,11 +99,10 @@
     border-radius: 50%;
     cursor: pointer;
     display: block;
-    width: 300px; /* Tamaño reducido */
+    width: 300px;
     height: 300px;
   }
 
-  /* Pivote 3D */
   .ruleta-container::after {
     content: '';
     position: absolute;
@@ -113,34 +145,63 @@
     color: #2f3542;
   }
 
-  /* --- Panel de Configuración con Scroll --- */
+  /* --- Panel de Configuración Deslizante --- */
   .panel-configuracion {
+    position: fixed;
+    top: 0;
+    right: -350px; /* Oculto fuera de la pantalla por defecto */
+    width: 280px;
+    height: 100vh; /* Ocupa toda la altura de la pantalla */
     background: white;
-    padding: 25px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    width: 280px; /* Más estrecho */
-    max-height: 520px; /* Altura máxima fija para todo el panel */
+    box-shadow: -5px 0 25px rgba(0,0,0,0.15);
+    z-index: 1000; /* Por encima de todo */
+    transition: right 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    padding: 25px 20px;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
   }
 
-  .panel-configuracion h3 {
-    margin: 0 0 15px 0;
-    font-size: 18px;
-    color: #2f3542;
-    text-align: center;
+  .panel-configuracion.abierto {
+    right: 0; /* Desliza hacia adentro */
+  }
+
+  .header-panel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
     border-bottom: 2px solid #f1f2f6;
     padding-bottom: 10px;
+  }
+
+  .header-panel h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #2f3542;
+  }
+
+  .btn-cerrar-panel {
+    background: transparent;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #ff4757;
+    line-height: 1;
+    padding: 0 5px;
+    transition: transform 0.2s;
+  }
+
+  .btn-cerrar-panel:hover {
+    transform: scale(1.2);
   }
 
   #lista-opciones {
     list-style: none;
     padding: 0;
     margin: 0 0 15px 0;
-    overflow-y: auto; /* Scroll habilitado */
-    flex-grow: 1; /* Ocupa el espacio disponible */
-    max-height: 300px; /* Altura máxima de la lista antes de hacer scroll */
+    overflow-y: auto; 
+    flex-grow: 1; 
     scrollbar-width: thin;
     scrollbar-color: #ced6e0 transparent;
   }
@@ -153,7 +214,7 @@
     gap: 8px;
     margin-bottom: 10px;
     align-items: center;
-    padding-right: 5px; /* Espacio para el scroll */
+    padding-right: 5px; 
   }
 
   .item-opcion input {
@@ -185,36 +246,43 @@
     cursor: pointer;
     font-weight: bold;
     font-size: 14px;
-  }
-
-  /* Ajustes Móviles */
-  @media (max-width: 700px) {
-    .contenedor-ruleta, .panel-configuracion { width: 100%; min-width: unset; }
+    margin-top: auto; /* Mantiene el botón al fondo */
   }
 </style>
 </head>
 <body>
 
-<div class="layout-principal">
-  
-  <div class="contenedor-ruleta">
-    <div class="flecha"></div>
-    <div class="ruleta-container">
-      <canvas id="canvas" width="300" height="300"></canvas>
-    </div>
-    <button id="girarBtn" onclick="girarRuleta()">Girar Ruleta</button>
-    <div id="resultado">¡Suerte!</div>
-  </div>
+<button id="btn-menu" onclick="toggleMenu()">☰</button>
+<div id="overlay" onclick="toggleMenu()"></div>
 
-  <div class="panel-configuracion">
+<div class="contenedor-ruleta">
+  <div class="flecha"></div>
+  <div class="ruleta-container">
+    <canvas id="canvas" width="300" height="300"></canvas>
+  </div>
+  <button id="girarBtn" onclick="girarRuleta()">Girar Ruleta</button>
+  <div id="resultado">¡Suerte!</div>
+</div>
+
+<div class="panel-configuracion" id="panel-config">
+  <div class="header-panel">
     <h3>⚙️ Opciones</h3>
-    <ul id="lista-opciones"></ul>
-    <button class="btn-añadir" onclick="añadirOpcion()">+ Añadir opción</button>
+    <button class="btn-cerrar-panel" onclick="toggleMenu()">×</button>
   </div>
-
+  <ul id="lista-opciones"></ul>
+  <button class="btn-añadir" onclick="añadirOpcion()">+ Añadir opción</button>
 </div>
 
 <script>
+// --- LÓGICA DEL MENÚ LATERAL ---
+function toggleMenu() {
+  const panel = document.getElementById('panel-config');
+  const overlay = document.getElementById('overlay');
+  
+  panel.classList.toggle('abierto');
+  overlay.classList.toggle('activo');
+}
+
 // --- LÓGICA DE LA RULETA ---
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
@@ -307,7 +375,7 @@ function añadirOpcion() {
 
 renderizarLista();
 
-// --- PROTECCIÓN ---
+// --- PROTECCIÓN BÁSICA ---
 document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('keydown', e => {
   if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I') || (e.ctrlKey && e.key === 'u')) e.preventDefault();
