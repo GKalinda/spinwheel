@@ -13,14 +13,14 @@
     min-height: 100vh;
     background: radial-gradient(circle at center, #ffffff 0%, #f0f2f5 100%);
     margin: 0;
-    padding: 20px;
+    padding: 40px 20px; /* Algo de padding arriba y abajo para que respire */
     box-sizing: border-box;
   }
 
   .layout-principal {
     display: flex;
     gap: 40px;
-    align-items: flex-start;
+    align-items: stretch; /* CLAVE: Hace que ambos cuadros tengan la misma altura */
     flex-wrap: wrap;
     justify-content: center;
     max-width: 1200px;
@@ -36,6 +36,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center; /* Mantiene la ruleta centrada verticalmente */
+    flex: 1; /* Permite que tome el espacio necesario */
+    min-width: 450px;
   }
 
   .flecha {
@@ -56,7 +59,6 @@
     justify-content: center;
     align-items: center;
     border-radius: 50%;
-    /* Borde negro eliminado, reemplazado por una sombra suave */
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
   }
 
@@ -94,7 +96,7 @@
     cursor: pointer;
     box-shadow: 0 4px 15px rgba(117, 143, 255, 0.4);
     transition: all 0.3s ease;
-    margin-top: 30px;
+    margin-top: 40px;
     text-transform: uppercase;
     letter-spacing: 1px;
   }
@@ -146,8 +148,7 @@
     padding: 30px;
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    width: 300px;
-    max-height: 600px;
+    width: 320px;
     display: flex;
     flex-direction: column;
   }
@@ -156,7 +157,9 @@
     margin-top: 0;
     color: #2f3542;
     border-bottom: 2px solid #f1f2f6;
-    padding-bottom: 10px;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    text-align: center;
   }
 
   #lista-opciones {
@@ -165,21 +168,32 @@
     margin: 0 0 20px 0;
     overflow-y: auto;
     flex-grow: 1;
+    /* Estilo para la barra de scroll (opcional pero queda más limpio) */
+    scrollbar-width: thin;
+    scrollbar-color: #ced6e0 transparent;
+  }
+
+  #lista-opciones::-webkit-scrollbar {
+    width: 6px;
+  }
+  #lista-opciones::-webkit-scrollbar-thumb {
+    background-color: #ced6e0;
+    border-radius: 10px;
   }
 
   .item-opcion {
     display: flex;
     gap: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     align-items: center;
   }
 
   .item-opcion input {
     flex-grow: 1;
-    padding: 10px;
+    padding: 12px;
     border: 1px solid #ced6e0;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 15px;
     outline: none;
     transition: border-color 0.2s;
   }
@@ -192,12 +206,16 @@
     background: #ff4757;
     color: white;
     border: none;
-    width: 30px;
-    height: 30px;
+    width: 35px;
+    height: 35px;
     border-radius: 8px;
     cursor: pointer;
     font-weight: bold;
+    font-size: 16px;
     transition: background 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .btn-eliminar:hover {
@@ -208,17 +226,29 @@
     background: #2ed573;
     color: white;
     border: none;
-    padding: 12px;
+    padding: 15px;
     border-radius: 8px;
     cursor: pointer;
     font-weight: bold;
-    font-size: 15px;
+    font-size: 16px;
     transition: all 0.2s;
+    margin-top: auto; /* Empuja el botón al fondo si hay pocas opciones */
   }
 
   .btn-añadir:hover {
     background: #26de81;
     transform: translateY(-2px);
+  }
+
+  /* Adaptación para móviles */
+  @media (max-width: 900px) {
+    .contenedor-ruleta {
+      min-width: 100%;
+    }
+    .panel-configuracion {
+      width: 100%;
+      min-height: 400px;
+    }
   }
 </style>
 </head>
@@ -236,7 +266,7 @@
   </div>
 
   <div class="panel-configuracion">
-    <h3>Editar Opciones</h3>
+    <h3>⚙️ Editar Opciones</h3>
     <ul id="lista-opciones">
       </ul>
     <button class="btn-añadir" onclick="añadirOpcion()">+ Añadir nueva opción</button>
@@ -265,7 +295,6 @@ const colores = [
   "#bdb2ff", "#ffc6ff", "#fffffc", "#d0f4de", "#f1cbff", "#ffb3c6"
 ];
 
-// Función para oscurecer colores y crear el efecto de degradado
 function ajustarColor(color, cantidad) {
   let r, g, b;
   if (color.startsWith('#')) {
@@ -281,7 +310,6 @@ function ajustarColor(color, cantidad) {
   return `rgb(${r}, ${g}, ${b})`;
 }
 
-// DIBUJAR LA RULETA
 function dibujarRuleta() {
   const slices = opciones.length;
   if (slices === 0) {
@@ -317,7 +345,6 @@ function dibujarRuleta() {
     ctx.rotate(((i + 0.5) * 2 * Math.PI) / slices);
     ctx.fillStyle = "#2f3542";
     
-    // Ajustar el tamaño del texto si hay muchas opciones
     const fontSize = slices > 15 ? 14 : 18;
     ctx.font = `bold ${fontSize}px sans-serif`;
     ctx.textAlign = "right";
@@ -327,7 +354,6 @@ function dibujarRuleta() {
   }
 }
 
-// GIRAR LA RULETA
 function girarRuleta() {
   if (ruletaGirando || opciones.length === 0) return;
 
@@ -359,11 +385,10 @@ function girarRuleta() {
   setTimeout(() => {
     const textoGanador = opciones[indiceGanador];
     
-    // Configurar el mensaje final
     if (textoGanador.toLowerCase().includes("perdonado")) {
       resultado.innerText = "¡Has sido perdonado! 🎉";
       resultado.classList.add("resultado-perdonado");
-    } else if (textoGanador.toLowerCase().includes("vuelve a tirar")) {
+    } else if (textoGanador.toLowerCase().includes("vuelve a tirar") || textoGanador.toLowerCase().includes("otra vez")) {
       resultado.innerText = "¡Tira de nuevo! 🔄";
       resultado.classList.add("resultado-reintentar");
       setTimeout(() => { if(!ruletaGirando) resultado.innerText += " (¡Tu turno!)"; }, 1500);
@@ -375,8 +400,6 @@ function girarRuleta() {
     girarBtn.disabled = false;
   }, 4050); 
 }
-
-// --- LÓGICA DEL PANEL DE CONFIGURACIÓN ---
 
 function renderizarLista() {
   listaOpcionesUI.innerHTML = "";
@@ -391,7 +414,8 @@ function renderizarLista() {
     
     const btnEliminar = document.createElement("button");
     btnEliminar.className = "btn-eliminar";
-    btnEliminar.innerText = "X";
+    // Símbolo de papelera o X
+    btnEliminar.innerHTML = "×"; 
     btnEliminar.onclick = () => eliminarOpcion(index);
     
     li.appendChild(input);
@@ -403,7 +427,7 @@ function renderizarLista() {
 
 function actualizarOpcion(index, nuevoValor) {
   opciones[index] = nuevoValor;
-  dibujarRuleta(); // Redibuja en tiempo real
+  dibujarRuleta(); 
 }
 
 function eliminarOpcion(index) {
@@ -418,11 +442,9 @@ function eliminarOpcion(index) {
 function añadirOpcion() {
   opciones.push("Nueva Opción");
   renderizarLista();
-  // Scroll hacia abajo para ver la nueva opción
   listaOpcionesUI.scrollTop = listaOpcionesUI.scrollHeight;
 }
 
-// Inicializar
 renderizarLista();
 
 canvas.addEventListener('click', () => {
