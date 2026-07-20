@@ -11,13 +11,6 @@
 </head>
 <body>
 
-<button id="btn-menu" aria-label="Abrir opciones" onclick="toggleMenu()">
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M2 5H18M2 10H18M2 15H18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-  </svg>
-</button>
-<div id="overlay" onclick="toggleMenu()"></div>
-
 <main class="contenedor-ruleta">
 
   <header class="cabecera">
@@ -33,23 +26,17 @@
   <button id="girarBtn" onclick="girarRuleta()">Girar ruleta</button>
   <div id="resultado" role="status" aria-live="polite">Gira cuando quieras</div>
 
-  <!-- Enlace de apoyo, totalmente opcional: siempre el mismo, no depende
-       del resultado de la ruleta, y nunca bloquea ni condiciona volver a girar. -->
+  <!-- Enlace de apoyo, totalmente opcional: siempre disponible, nunca
+       bloquea ni condiciona volver a girar. -->
   <button id="btn-pagar" class="btn-pagar" hidden>
     Ver mi lista de deseos <span class="opcional">· si te apetece</span>
   </button>
 
 </main>
 
-<aside class="panel-configuracion" id="panel-config" aria-hidden="true">
-  <div class="header-panel">
-    <h3>Opciones de la ruleta</h3>
-    <button class="btn-cerrar-panel" aria-label="Cerrar" onclick="toggleMenu()">×</button>
-  </div>
-  <ul id="lista-opciones"></ul>
-  <button class="btn-añadir" onclick="añadirOpcion()">+ Añadir opción</button>
-</aside>
-
+<!-- config.js define WHEEL_OPTIONS y THRONE_WISHLIST_URL. Se edita
+     solo en el servidor (o vía admin.html), nunca desde esta página. -->
+<script src="config.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
