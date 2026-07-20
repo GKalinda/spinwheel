@@ -1,30 +1,4 @@
-// =============================================================
-// RULETA PREMIUM — lógica de interfaz
-//
-// SOBRE EL PAGO:
-// El botón de pago que aparece tras el resultado es TOTALMENTE
-// OPCIONAL: nunca bloquea la ruleta, no se exige para volver a
-// girar y no se guarda ninguna deuda ni obligación en ningún sitio.
-// Simplemente abre un enlace de pago de Stripe (Payment Link) en
-// modo test, si la persona decide voluntariamente apoyar/pagar.
-//
-// CÓMO CONECTARLO A TU CUENTA DE STRIPE (modo test):
-// 1. Entra en tu Dashboard de Stripe → activa el "modo test"
-//    (interruptor arriba a la derecha).
-// 2. Ve a Payment Links → crea un enlace por cada importe que
-//    quieras probar (por ejemplo 1 €, 4 €, 10 €).
-// 3. Copia cada URL (empieza por https://buy.stripe.com/test_...)
-//    y pégala en STRIPE_PAYMENT_LINKS más abajo, usando como
-//    clave el mismo texto que tengas en las opciones de la ruleta.
-// No hace falta backend ni exponer ninguna clave secreta: la
-// página de pago la sirve Stripe directamente.
-// =============================================================
-
-const STRIPE_PAYMENT_LINKS = {
-  "1€": "https://buy.stripe.com/test_TU_ENLACE_1",
-  "4€": "https://buy.stripe.com/test_TU_ENLACE_2",
-  "10€": "https://buy.stripe.com/test_TU_ENLACE_3",
-};
+const THRONE_WISHLIST_URL = "https://throne.com/tu-usuario";
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
@@ -32,7 +6,6 @@ const resultado = document.getElementById("resultado");
 const girarBtn = document.getElementById("girarBtn");
 const listaOpcionesUI = document.getElementById("lista-opciones");
 const btnPagar = document.getElementById("btn-pagar");
-const btnPagarImporte = document.getElementById("btn-pagar-importe");
 
 let ruletaGirando = false;
 let rotacionActual = 0;
@@ -106,18 +79,12 @@ function dibujarRuleta() {
   }
 }
 
-function mostrarBotonPago(textoGanador) {
-  const enlace = STRIPE_PAYMENT_LINKS[textoGanador];
-  if (!enlace) {
-    btnPagar.hidden = true;
-    return;
-  }
-  btnPagarImporte.textContent = textoGanador;
+function mostrarEnlaceApoyo() {
   btnPagar.hidden = false;
   btnPagar.onclick = () => {
     // Se abre en una pestaña nueva: la persona decide libremente
-    // si completa el pago o simplemente la cierra.
-    window.open(enlace, "_blank", "noopener,noreferrer");
+    // si visita la lista, si regala algo o si simplemente la cierra.
+    window.open(THRONE_WISHLIST_URL, "_blank", "noopener,noreferrer");
   };
 }
 
@@ -159,8 +126,11 @@ function girarRuleta() {
     } else {
       resultado.textContent = `Resultado: ${textoGanador}`;
       resultado.className = "resultado-premio";
-      mostrarBotonPago(textoGanador);
     }
+
+    // El enlace de apoyo se muestra siempre igual, salga lo que salga:
+    // no está condicionado por el resultado de la ruleta.
+    mostrarEnlaceApoyo();
 
     ruletaGirando = false;
     girarBtn.disabled = false;
