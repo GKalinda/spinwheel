@@ -1,27 +1,19 @@
-const THRONE_WISHLIST_URL = "https://throne.com/tu-usuario";
+// =============================================================
+// RULETA PREMIUM — lógica pública (dibujo + giro)
+//
+// Este archivo NO contiene ningún editor de opciones. Los quesitos
+// y el enlace de apoyo vienen de config.js, que se sube al servidor
+// aparte y no es accesible ni editable desde esta página.
+// =============================================================
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const resultado = document.getElementById("resultado");
 const girarBtn = document.getElementById("girarBtn");
-const listaOpcionesUI = document.getElementById("lista-opciones");
 const btnPagar = document.getElementById("btn-pagar");
 
 let ruletaGirando = false;
 let rotacionActual = 0;
-
-// Cada quesito es { texto, enlace }. "enlace" es opcional: si se deja
-// vacío, ese quesito usará THRONE_WISHLIST_URL como respaldo.
-let opciones = [
-  { texto: "Teclado",   enlace: "" },
-  { texto: "Micrófono", enlace: "" },
-  { texto: "Vuelve a tirar", enlace: "" },
-  { texto: "Webcam",    enlace: "" },
-  { texto: "Auriculares", enlace: "" },
-  { texto: "Vuelve a tirar", enlace: "" },
-  { texto: "Luz de aro", enlace: "" },
-  { texto: "Sorpresa",  enlace: "" },
-];
 
 // Paleta oscura + dorado, a juego con el resto del diseño
 const colores = [
@@ -49,7 +41,7 @@ function ajustarColor(color, cantidad) {
 }
 
 function dibujarRuleta() {
-  const slices = opciones.length;
+  const slices = WHEEL_OPTIONS.length;
   if (slices === 0) return;
   ctx.clearRect(0, 0, 380, 380);
 
@@ -80,8 +72,8 @@ function dibujarRuleta() {
     ctx.font = `600 ${fontSize}px Inter, sans-serif`;
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
-    // fillText no interpreta HTML/JS: es seguro incluso con texto arbitrario del usuario
-    ctx.fillText(opciones[i].texto, centro - 20, 0);
+    // fillText no interpreta HTML/JS: es seguro incluso con texto arbitrario
+    ctx.fillText(WHEEL_OPTIONS[i].texto, centro - 20, 0);
     ctx.restore();
   }
 }
@@ -113,7 +105,7 @@ function mostrarEnlaceApoyo(opcionGanadora) {
 }
 
 function girarRuleta() {
-  if (ruletaGirando || opciones.length === 0) return;
+  if (ruletaGirando || WHEEL_OPTIONS.length === 0) return;
 
   ruletaGirando = true;
   girarBtn.disabled = true;
@@ -121,7 +113,7 @@ function girarRuleta() {
   resultado.className = "";
   resultado.textContent = "Girando...";
 
-  const slices = opciones.length;
+  const slices = WHEEL_OPTIONS.length;
   const indiceGanador = Math.floor(Math.random() * slices);
   const vueltasExtras = (Math.floor(Math.random() * 4) + 5) * 360;
 
@@ -141,17 +133,14 @@ function girarRuleta() {
   rotacionActual = rotacionTotal;
 
   setTimeout(() => {
-    const opcionGanadora = opciones[indiceGanador];
+    const opcionGanadora = WHEEL_OPTIONS[indiceGanador];
 
     if (esOpcionDeReintento(opcionGanadora.texto)) {
       resultado.textContent = "¡Tira de nuevo! 🔄";
       resultado.className = "resultado-reintentar";
-      // Sin enlace de apoyo en este caso: es solo un "vuelve a intentarlo".
     } else {
       resultado.textContent = `Resultado: ${opcionGanadora.texto}`;
       resultado.className = "resultado-premio";
-      // El enlace depende del quesito, pero sigue siendo 100% opcional:
-      // nada impide volver a girar en vez de usarlo.
       mostrarEnlaceApoyo(opcionGanadora);
     }
 
@@ -160,89 +149,8 @@ function girarRuleta() {
   }, 4050);
 }
 
-// --- Panel lateral ---
-function toggleMenu() {
-  const panel = document.getElementById('panel-config');
-  const overlay = document.getElementById('overlay');
-  const abierto = panel.classList.toggle('abierto');
-  overlay.classList.toggle('activo');
-  panel.setAttribute('aria-hidden', String(!abierto));
-}
-
-// --- Editor de opciones (construido con la API del DOM, sin innerHTML
-//     con datos del usuario, para evitar inyección de HTML/JS) ---
-function renderizarLista() {
-  listaOpcionesUI.innerHTML = "";
-
-  opciones.forEach((opcion, index) => {
-    const li = document.createElement("li");
-    li.className = "item-opcion";
-
-    const filaTexto = document.createElement("div");
-    filaTexto.className = "item-opcion__fila";
-
-    const input = document.createElement("input");
-    input.type = "text";
-    input.value = opcion.texto;
-    input.maxLength = 24;
-    input.placeholder = "Texto del quesito";
-    input.setAttribute("aria-label", `Texto de la opción ${index + 1}`);
-    input.addEventListener("input", (e) => {
-      opciones[index].texto = e.target.value;
-      dibujarRuleta();
-    });
-
-    const btnEliminar = document.createElement("button");
-    btnEliminar.className = "btn-eliminar";
-    btnEliminar.type = "button";
-    btnEliminar.textContent = "×";
-    btnEliminar.setAttribute("aria-label", `Eliminar opción ${index + 1}`);
-    btnEliminar.addEventListener("click", () => eliminarOpcion(index));
-
-    filaTexto.appendChild(input);
-    filaTexto.appendChild(btnEliminar);
-
-    const inputEnlace = document.createElement("input");
-    inputEnlace.type = "url";
-    inputEnlace.className = "item-opcion__enlace";
-    inputEnlace.value = opcion.enlace || "";
-    inputEnlace.placeholder = "Enlace opcional (Throne, etc.)";
-    inputEnlace.setAttribute("aria-label", `Enlace de la opción ${index + 1}`);
-    inputEnlace.addEventListener("input", (e) => {
-      opciones[index].enlace = e.target.value;
-    });
-
-    li.appendChild(filaTexto);
-    li.appendChild(inputEnlace);
-    listaOpcionesUI.appendChild(li);
-  });
-
-  dibujarRuleta();
-}
-
-function eliminarOpcion(index) {
-  if (opciones.length > 2) {
-    opciones.splice(index, 1);
-    renderizarLista();
-  } else {
-    resultado.className = "";
-    resultado.textContent = "La ruleta necesita al menos 2 opciones";
-  }
-}
-
-function añadirOpcion() {
-  if (opciones.length >= 20) {
-    resultado.className = "";
-    resultado.textContent = "Máximo 20 opciones";
-    return;
-  }
-  opciones.push({ texto: "Nueva", enlace: "" });
-  renderizarLista();
-  listaOpcionesUI.scrollTop = listaOpcionesUI.scrollHeight;
-}
-
 // --- Inicialización ---
-renderizarLista();
+dibujarRuleta();
 
 canvas.addEventListener('click', () => {
   if (!ruletaGirando) girarRuleta();
