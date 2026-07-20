@@ -297,13 +297,17 @@ body {
 #lista-opciones::-webkit-scrollbar-thumb { background-color: var(--border); border-radius: 10px; }
 
 .item-opcion {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 10px;
-  align-items: center;
+  margin-bottom: 12px;
 }
 
-.item-opcion input {
+.item-opcion__fila {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.item-opcion__fila input {
   flex-grow: 1;
   padding: 10px;
   background: var(--surface-2);
@@ -316,7 +320,26 @@ body {
   transition: border-color 0.2s;
 }
 
-.item-opcion input:focus { border-color: var(--gold); }
+.item-opcion__fila input:focus { border-color: var(--gold); }
+
+.item-opcion__enlace {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 8px;
+  font-size: 12px;
+  font-family: var(--font-body);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.item-opcion__enlace:focus {
+  border-color: var(--gold);
+  color: var(--text);
+}
 
 .btn-eliminar {
   background: transparent;
