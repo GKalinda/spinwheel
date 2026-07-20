@@ -10,10 +10,17 @@ const btnPagar = document.getElementById("btn-pagar");
 let ruletaGirando = false;
 let rotacionActual = 0;
 
-// Opciones de la ruleta. Puedes editarlas desde el panel lateral.
+// Cada quesito es { texto, enlace }. "enlace" es opcional: si se deja
+// vacío, ese quesito usará THRONE_WISHLIST_URL como respaldo.
 let opciones = [
-  "1€", "4€", "10€", "1€", "Vuelve a tirar",
-  "4€", "1€", "10€", "4€", "Vuelve a tirar", "1€"
+  { texto: "Teclado",   enlace: "" },
+  { texto: "Micrófono", enlace: "" },
+  { texto: "Vuelve a tirar", enlace: "" },
+  { texto: "Webcam",    enlace: "" },
+  { texto: "Auriculares", enlace: "" },
+  { texto: "Vuelve a tirar", enlace: "" },
+  { texto: "Luz de aro", enlace: "" },
+  { texto: "Sorpresa",  enlace: "" },
 ];
 
 // Paleta oscura + dorado, a juego con el resto del diseño
@@ -74,17 +81,34 @@ function dibujarRuleta() {
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
     // fillText no interpreta HTML/JS: es seguro incluso con texto arbitrario del usuario
-    ctx.fillText(opciones[i], centro - 20, 0);
+    ctx.fillText(opciones[i].texto, centro - 20, 0);
     ctx.restore();
   }
 }
 
-function mostrarEnlaceApoyo() {
+function esOpcionDeReintento(texto) {
+  const t = texto.toLowerCase();
+  return t.includes("vuelve a tirar") || t.includes("otra vez");
+}
+
+function esUrlSegura(url) {
+  try {
+    const u = new URL(url);
+    return u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function mostrarEnlaceApoyo(opcionGanadora) {
+  const enlaceEspecifico = opcionGanadora.enlace && opcionGanadora.enlace.trim();
+  const destino = esUrlSegura(enlaceEspecifico) ? enlaceEspecifico : THRONE_WISHLIST_URL;
+
   btnPagar.hidden = false;
   btnPagar.onclick = () => {
     // Se abre en una pestaña nueva: la persona decide libremente
-    // si visita la lista, si regala algo o si simplemente la cierra.
-    window.open(THRONE_WISHLIST_URL, "_blank", "noopener,noreferrer");
+    // si visita el enlace, si regala algo o si simplemente lo cierra.
+    window.open(destino, "_blank", "noopener,noreferrer");
   };
 }
 
@@ -117,20 +141,19 @@ function girarRuleta() {
   rotacionActual = rotacionTotal;
 
   setTimeout(() => {
-    const textoGanador = opciones[indiceGanador];
-    const textoNormalizado = textoGanador.toLowerCase();
+    const opcionGanadora = opciones[indiceGanador];
 
-    if (textoNormalizado.includes("vuelve a tirar") || textoNormalizado.includes("otra vez")) {
+    if (esOpcionDeReintento(opcionGanadora.texto)) {
       resultado.textContent = "¡Tira de nuevo! 🔄";
       resultado.className = "resultado-reintentar";
+      // Sin enlace de apoyo en este caso: es solo un "vuelve a intentarlo".
     } else {
-      resultado.textContent = `Resultado: ${textoGanador}`;
+      resultado.textContent = `Resultado: ${opcionGanadora.texto}`;
       resultado.className = "resultado-premio";
+      // El enlace depende del quesito, pero sigue siendo 100% opcional:
+      // nada impide volver a girar en vez de usarlo.
+      mostrarEnlaceApoyo(opcionGanadora);
     }
-
-    // El enlace de apoyo se muestra siempre igual, salga lo que salga:
-    // no está condicionado por el resultado de la ruleta.
-    mostrarEnlaceApoyo();
 
     ruletaGirando = false;
     girarBtn.disabled = false;
@@ -155,13 +178,17 @@ function renderizarLista() {
     const li = document.createElement("li");
     li.className = "item-opcion";
 
+    const filaTexto = document.createElement("div");
+    filaTexto.className = "item-opcion__fila";
+
     const input = document.createElement("input");
     input.type = "text";
-    input.value = opcion;
+    input.value = opcion.texto;
     input.maxLength = 24;
-    input.setAttribute("aria-label", `Opción ${index + 1}`);
+    input.placeholder = "Texto del quesito";
+    input.setAttribute("aria-label", `Texto de la opción ${index + 1}`);
     input.addEventListener("input", (e) => {
-      opciones[index] = e.target.value;
+      opciones[index].texto = e.target.value;
       dibujarRuleta();
     });
 
@@ -172,8 +199,21 @@ function renderizarLista() {
     btnEliminar.setAttribute("aria-label", `Eliminar opción ${index + 1}`);
     btnEliminar.addEventListener("click", () => eliminarOpcion(index));
 
-    li.appendChild(input);
-    li.appendChild(btnEliminar);
+    filaTexto.appendChild(input);
+    filaTexto.appendChild(btnEliminar);
+
+    const inputEnlace = document.createElement("input");
+    inputEnlace.type = "url";
+    inputEnlace.className = "item-opcion__enlace";
+    inputEnlace.value = opcion.enlace || "";
+    inputEnlace.placeholder = "Enlace opcional (Throne, etc.)";
+    inputEnlace.setAttribute("aria-label", `Enlace de la opción ${index + 1}`);
+    inputEnlace.addEventListener("input", (e) => {
+      opciones[index].enlace = e.target.value;
+    });
+
+    li.appendChild(filaTexto);
+    li.appendChild(inputEnlace);
     listaOpcionesUI.appendChild(li);
   });
 
@@ -196,7 +236,7 @@ function añadirOpcion() {
     resultado.textContent = "Máximo 20 opciones";
     return;
   }
-  opciones.push("Nueva");
+  opciones.push({ texto: "Nueva", enlace: "" });
   renderizarLista();
   listaOpcionesUI.scrollTop = listaOpcionesUI.scrollHeight;
 }
